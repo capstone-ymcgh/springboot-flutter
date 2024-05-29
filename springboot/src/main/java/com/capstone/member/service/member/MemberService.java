@@ -62,6 +62,14 @@ public class MemberService {
             return null;
         }
     }
+    public String findImageByEmail(String email){
+        MemberEntity member = memberRepository.findByEmail(email);
+        if (member != null) {
+            return member.getImagepath();
+        } else {
+            return null;
+        }
+    }
     public void delete(MemberEntity member) {
         memberRepository.delete(member);
     }

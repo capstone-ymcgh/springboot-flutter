@@ -49,7 +49,6 @@ public class RecipeService {
                 dailyMealPlanWithPrice.put("date",currentDate);
                 dailyMealPlanWithPrice.put("mealPlan", dailyMealPlan);
                 dailyMealPlanWithPrice.put("totalPrice", formatPrice(totalPrice)); // 가격 형식 변환
-                //dailyMealPlanWithPrice.put("servings", servings); // 인분 수 추가
                 monthlyMealPlan.add(dailyMealPlanWithPrice);
             }
         }
