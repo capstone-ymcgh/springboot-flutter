@@ -1,2 +1,2 @@
-# springboot-flutter
-스프링부트-플러터 연동
+Flutter : 코드 실행시 service.dart 파일 내의 serverurl을 본인 서버 ip로 변경 <br/>
+spring-boot : 코드 실행 시 DB 연동 정보 확인
