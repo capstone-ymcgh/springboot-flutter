@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:one_flutter_app/spring/service.dart';
 
 import 'dietpage.dart';
 
@@ -16,17 +17,19 @@ class _DietListPageState extends State<DietListPage> {
   List<Map<String, dynamic>> diets = [];
   List<DateTime> selectedDates = [];
   List<dynamic> texts = [];
-
+  Service service = Service();
+  String serverurl = '';
   @override
   void initState() {
     super.initState();
+    serverurl = service.getServerurl();
     _loadDiets();
   }
 
   Future<void> _loadDiets() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String email = prefs.getString('email') ?? ''; // 사용자의 이메일 가져오기
-    var url = Uri.parse('http://localhost:8000/api/diet/$email');
+    var url = Uri.parse('$serverurl/api/diet/$email');
 
     try {
       var response = await http.get(url);

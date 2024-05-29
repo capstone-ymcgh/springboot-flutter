@@ -19,12 +19,12 @@ class DietPage extends StatefulWidget {
 
 class _DietPageState extends State<DietPage> {
   bool _isListView = true; // 현재 보기가 일렬 보기인지 여부를 저장할 변수
-  final String url = 'http://localhost:8000/generate-meal-plan';
   List<dynamic> recipeData = [];
   String originalJsonData = ''; // 추가: 원본 JSON 데이터를 저장할 변수
   Map<DateTime, List<String>> texts = {};
   List<DateTime> selectedDate = [];
-  Service service = new Service();
+  Service service = Service();
+  String serverurl = '';
   final TextEditingController _titleController = TextEditingController();
   String yearMonthDay = '';
   String decodedData = '';
@@ -38,6 +38,7 @@ class _DietPageState extends State<DietPage> {
   @override
   void initState() {
     super.initState();
+    serverurl = service.getServerurl();
     if (widget.selectedDates.isNotEmpty) {
       DateTime firstDate = widget.selectedDates.first;
       yearMonthDay = "${firstDate.year}-${firstDate.month.toString().padLeft(2, '0')}-${firstDate.day.toString().padLeft(2, '0')}";
@@ -48,6 +49,7 @@ class _DietPageState extends State<DietPage> {
 
   // HTTP 요청을 보내고 JSON 데이터를 받아오는 함수
   Future<void> fetchMenuData(String date, String div, int serving) async {
+    String url = '$serverurl/generate-meal-plan';
     final response = await http.get(
       Uri.parse('$url?month=$date&div=$div&servings=$serving'),
       headers: {
@@ -186,7 +188,7 @@ class _DietPageState extends State<DietPage> {
   Future<void> _saveData(String title) async {
     String email = await service.getEmail();
     // HTTP POST 요청 보내기
-    var url = Uri.parse('http://localhost:8000/api/diet/save');
+    var url = Uri.parse('$serverurl/api/diet/save');
     var body = jsonEncode({
       'title': title,
       'texts': originalJsonData,

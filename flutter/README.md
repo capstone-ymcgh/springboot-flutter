@@ -1,1 +1,1 @@
-구동시 각 코드에서 요청보내는 주소 localhost에서 자신 서버 주소로 변경 후 실행
+코드 실행시 service.dart 파일 내의 serverurl을 본인이 사용하는 서버 ip로 수정
