@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,7 +7,7 @@ import 'loginpage.dart';
 import 'dietlistpage.dart';
 import 'package:one_flutter_app/spring/service.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:image_picker/image_picker.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -15,17 +16,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Service service = new Service();
-  String nickname = "nickname";
-  String e_mail = "e-mail";
+  Service service = Service();
+  String serverurl = '';
+  String nickname = "";
+  String e_mail = "";
   String passward = "passward";
   String newNickname = ''; // 새로운 닉네임을 저장할 변수
   String newPassword = ''; //
+  File? _image;
 
 
   @override
   void initState() {
     super.initState();
+    serverurl = service.getServerurl();
+    _getImageUrlFromServer();
     _loadEmail();
     _loadNickname();
   }
@@ -33,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadNickname() async {
     try {
       String email = await service.getEmail();
-      var uri = Uri.parse("http://localhost:8000/api/getNickname?email=$email");
+      var uri = Uri.parse("$serverurl/api/getNickname?email=$email");
 
       var response = await http.get(uri);
 
@@ -63,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
       nickname = newNickname;
     });
     String email = await service.getEmail();
-    var url = Uri.parse('http://localhost:8000/api/updateNickname');
+    var url = Uri.parse('$serverurl/api/updateNickname');
     var body = jsonEncode({'email': email, 'nickname': newNickname}); // 변경된 닉네임을 newNickname으로 설정
     var headers = {'Content-Type': 'application/json'};
     try {
@@ -87,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
       passward = newPassword;
     });
     String email = await service.getEmail();
-    var url = Uri.parse('http://localhost:8000/api/updatePassword');
+    var url = Uri.parse('$serverurl/api/updatePassword');
     var body = jsonEncode({'email': email, 'password': newPassword}); // 변경된 닉네임을 newNickname으로 설정
     var headers = {'Content-Type': 'application/json'};
     try {
@@ -107,7 +112,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _deleteAccount() async {
     String email = await service.getEmail();
 
-    var url = Uri.parse('http://localhost:8000/api/deleteAccount');
+    var url = Uri.parse('$serverurl/api/deleteAccount');
     var body = jsonEncode({'email': email});
     var headers = {'Content-Type': 'application/json'};
 
@@ -125,6 +130,64 @@ class _ProfilePageState extends State<ProfilePage> {
       print('에러: $e');
     }
   }
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      await _uploadImage(pickedFile.path);
+    }
+  }
+  Future<void> _uploadImage(String imagePath) async {
+    var url = Uri.parse('$serverurl/api/updateImage');
+    String email = await service.getEmail();
+
+    try {
+      var body = jsonEncode({
+        'email': email,
+        'imagePath': imagePath,
+      });
+
+      var headers = {'Content-Type': 'application/json'};
+      var response = await http.put(
+        url,
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print('Image path uploaded successfully');
+      } else {
+        print('Failed to upload image path: ${response.statusCode}');
+        print(email +" / " + imagePath);
+      }
+    } catch (e) {
+      print('Error uploading image path: $e');
+    }
+  }
+
+  Future<void> _getImageUrlFromServer() async {
+    // 서버로부터 이미지 주소를 받아오는 HTTP 요청 수행
+    String email = await service.getEmail();
+    try {
+      final response = await http.get(
+        Uri.parse('$serverurl/api/getImage?email=$email'), // 이메일을 쿼리 매개변수로 전송
+      );
+      if (response.statusCode == 200) {
+        // HTTP 요청이 성공하면 이미지 주소를 변수에 저장
+        setState(() {
+          _image = File(response.body);
+        });
+      } else {
+        print('Failed to get image URL: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error getting image URL: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +203,12 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(Icons.account_circle, size: 60),
+                  _image != null
+                      ? CircleAvatar(
+                    backgroundImage: FileImage(_image!),
+                    radius: 30,
+                  )
+                      : Icon(Icons.account_circle, size: 0),
                   SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.end, // 오른쪽으로 정렬
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: _pickImage,
                 child: Text('프로필 사진 변경', style: TextStyle(fontSize: 20)),
               ),
             ],
@@ -397,7 +465,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text('비밀번호 변경'),
           content: TextField(
             onChanged: (value) {
-              newPassword = value; // 사용자가 입력한 닉네임 저장
+              newPassword = value; // 사용자가 입력한 비밀번호 저장
             },
             decoration: InputDecoration(
               hintText: '새로운 비밀번호를 입력해주세요',
@@ -413,7 +481,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             TextButton(
               onPressed: () {
-                // 확인 버튼을 눌렀을 때 새 닉네임을 적용하고 다이얼로그 닫기
+                // 확인 버튼을 눌렀을 때 새 비밀번호를 적용하고 다이얼로그 닫기
                 _savePassword(newPassword);
                 Navigator.of(context).pop();
               },

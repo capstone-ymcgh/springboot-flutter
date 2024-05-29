@@ -11,4 +11,5 @@ public class MemberDto {
     private String password;
     private String usertype;
     private String businesscode;
+    private String imagepath;
 }

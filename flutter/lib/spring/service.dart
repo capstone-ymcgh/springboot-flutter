@@ -4,10 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Service{
+  String serverurl = 'http://localhost:8000';
+  String getServerurl(){
+    return serverurl;
+  }
   Future<http.Response?> saveUser(
       String email, String nickname, String password, String usertype, String businesscode) async {
     try {
-      var uri = Uri.parse("http://localhost:8000/api/signup"); // localhost 부분에 자신 서버 ip 입력
+      var uri = Uri.parse("$serverurl/api/signup");
       Map<String,String> headers = {"Content-Type": "application/json"};
 
       Map data = {
@@ -17,20 +21,16 @@ class Service{
         'usertype' : '$usertype',
         'businesscode' : '$businesscode'
       };
-
       var body = json.encode(data);
       var response = await http.post(uri,headers: headers, body: body);
 
       if (response.statusCode == 200) {
         // 서버로부터 성공적인 응답을 받았을 때의 동작
         print("회원가입 성공");
-        // 여기에 성공했을 때 수행할 동작 추가
       } else {
         // 서버로부터 실패한 응답을 받았을 때의 동작
         print("회원가입 실패: ${response.body}");
-        // 여기에 실패했을 때 수행할 동작 추가
       }
-
       print("${response.body}");
       return response;
     } catch (error) {
@@ -41,7 +41,7 @@ class Service{
 
   Future<http.Response?> login(String email, String password) async {
     try {
-      var uri = Uri.parse("http://localhost:8000/api/login");
+      var uri = Uri.parse("$serverurl/api/login");
       Map<String,String> headers = {"Content-Type": "application/json"};
 
       Map data = {
@@ -67,7 +67,7 @@ class Service{
 
   Future<bool> findPassword(String email) async {
     try {
-      var uri = Uri.parse("http://localhost:8000/api/findpassword?email=$email");
+      var uri = Uri.parse("$serverurl/api/findpassword?email=$email");
 
       var response = await http.get(uri);
 
@@ -86,7 +86,7 @@ class Service{
 
 
   void saveDiet(String title, String date, String menu) async {
-    var url = Uri.parse('http://localhost:8000/saveDiet');
+    var url = Uri.parse('$serverurl/saveDiet');
     var body = jsonEncode({'title': title, 'date': date, 'menu': menu});
     var headers = {'Content-Type': 'application/json'};
 

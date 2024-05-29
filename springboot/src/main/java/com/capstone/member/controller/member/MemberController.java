@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.capstone.member.repository.member.MemberRepository;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -97,6 +98,36 @@ public class MemberController {
             return ResponseEntity.ok("비밀번호를 성공적으로 변경하였습니다.");
         } else {
             return ResponseEntity.badRequest().body("해당 이메일을 가진 회원을 찾을 수 없습니다.");
+        }
+    }
+    @PutMapping("/updateImage")
+    public ResponseEntity<String> updateImageByEmail(@RequestBody Map<String, String> requestData) {
+        String email = requestData.get("email");
+        String imagePath = requestData.get("imagePath");
+
+        if (email == null || email.isEmpty() || imagePath == null || imagePath.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        MemberEntity member = memberService.findByEmail(email);
+        if (member != null) {
+            member.setImagepath(imagePath); // 이미지 경로 업데이트
+            memberRepository.save(member);
+            return ResponseEntity.ok("이미지 경로를 성공적으로 변경하였습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("해당 이메일을 가진 회원을 찾을 수 없습니다.");
+        }
+    }
+    @GetMapping("/getImage")
+    public ResponseEntity<String> getImageByEmail(@RequestParam String email) {
+        if(email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        String nickname = memberService.findImageByEmail(email);
+        if (nickname != null) {
+            return ResponseEntity.ok(nickname);
+        } else {
+            return ResponseEntity.badRequest().build();
         }
     }
     @DeleteMapping("/deleteAccount")

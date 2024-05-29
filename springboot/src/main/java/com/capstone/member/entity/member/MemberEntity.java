@@ -32,5 +32,6 @@ public class MemberEntity {
     @Column(name = "businesscode")
     private String businesscode;
 
-    // getters and setters
+    @Column(name = "imagepath")
+    private String imagepath;
 }
