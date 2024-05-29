@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+</head>
+<body>
+<h1>회원가입 페이지</h1>
+<form action="/api/signup" method="post">
+    <label for="email">이메일:</label><br>
+    <input type="text" id="email" name="email"><br>
+    <label for="nickname">닉네임:</label><br>
+    <input type="text" id="nickname" name="nickname"><br>
+    <label for="password">비밀번호:</label><br>
+    <input type="password" id="password" name="password"><br>
+    <label for="confirmPassword">비밀번호 확인:</label><br>
+    <input type="password" id="confirmPassword" name="confirmPassword"><br>
+    <label for="userType">사용자 유형:</label><br>
+    <select id="userType" name="userType">
+        <option value="일반 사용자">일반 사용자</option>
+        <option value="도매상">도매상</option>
+    </select><br>
+    <div id="businessCodeField" style="display: none;">
+        <label for="businessCode">사업자 코드:</label><br>
+        <input type="text" id="businessCode" name="businessCode"><br>
+    </div>
+    <button type="submit">회원가입</button>
+</form>
+<script>
+    document.getElementById("userType").addEventListener("change", function() {
+        var userType = this.value;
+        var businessCodeField = document.getElementById("businessCodeField");
+        if (userType === "도매상") {
+            businessCodeField.style.display = "block";
+        } else {
+            businessCodeField.style.display = "none";
+        }
+    });
+</script>
+</body>
+</html>
